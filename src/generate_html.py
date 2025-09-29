@@ -18,7 +18,7 @@ def extract_title(markdown):
     raise Exception("no header")
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, base_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}:")
 
     with open(from_path, "r", encoding="utf-8") as f:
@@ -31,6 +31,10 @@ def generate_page(from_path, template_path, dest_path):
     html_string = html_string.replace("{{ Title }}", title)  
     html_string = html_string.replace("{{ Content }}", html) 
 
+    html_string = html_string.replace('href="/', f'href="{base_path}')
+    html_string = html_string.replace('src="/', f'src="{base_path}')
+
+
     parent = os.path.dirname(dest_path)
     if parent:
         os.makedirs(parent, exist_ok=True) 
@@ -39,7 +43,7 @@ def generate_page(from_path, template_path, dest_path):
     print(f"{dest_path} done.")
 
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, base_path):
     full_source_path = os.path.join(dir_path_content)
     full_template_path = os.path.join(template_path)
     full_dest_path = os.path.join(dest_dir_path)
@@ -52,8 +56,8 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
 
         if os.path.isfile(full_path_to_item) and full_path_to_item.endswith(".md"):
             full_path_to_item_dest = full_path_to_item_dest[:-2] + "html"
-            generate_page(full_path_to_item, full_template_path, full_path_to_item_dest)
+            generate_page(full_path_to_item, full_template_path, full_path_to_item_dest, base_path)
         elif os.path.isdir(full_path_to_item):
             os.mkdir(full_path_to_item_dest)
-            generate_pages_recursive(full_path_to_item, template_path, full_path_to_item_dest)
+            generate_pages_recursive(full_path_to_item, template_path, full_path_to_item_dest, base_path)
     print(f"{full_source_path} done")
